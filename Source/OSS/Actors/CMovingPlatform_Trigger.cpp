@@ -1,27 +1,38 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
-
 #include "CMovingPlatform_Trigger.h"
+#include "Components/BoxComponent.h"
+#include "../OSS.h"
+#include "CMovingPlatform.h"
 
-// Sets default values
 ACMovingPlatform_Trigger::ACMovingPlatform_Trigger()
 {
- 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = true;
-
+	BoxComp = CreateDefaultSubobject<UBoxComponent>("BoxComp");
+	RootComponent = BoxComp;
 }
 
-// Called when the game starts or when spawned
 void ACMovingPlatform_Trigger::BeginPlay()
 {
 	Super::BeginPlay();
-	
+
+	OnActorBeginOverlap.AddDynamic(this, &ACMovingPlatform_Trigger::OnBeginOverlap);
+	OnActorEndOverlap.AddDynamic(this, &ACMovingPlatform_Trigger::OnEndOverlap);
 }
 
-// Called every frame
-void ACMovingPlatform_Trigger::Tick(float DeltaTime)
+void ACMovingPlatform_Trigger::OnBeginOverlap(AActor* OverlappedActor, AActor* OtherActor)
 {
-	Super::Tick(DeltaTime);
+	//LogOnScreen(this, GetNameSafe(OtherActor) + " is begin overlap");
 
+	for (const auto& Platform : PlatformsToTrigger)
+	{
+		Platform->IncreaseActiveCount();
+	}
 }
 
+void ACMovingPlatform_Trigger::OnEndOverlap(AActor* OverlappedActor, AActor* OtherActor)
+{
+	//LogOnScreen(this, GetNameSafe(OtherActor) + " is end overlap");
+
+	for (const auto& Platform : PlatformsToTrigger)
+	{
+		Platform->DecreaseActiveCount();
+	}
+}
