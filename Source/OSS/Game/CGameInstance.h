@@ -8,6 +8,7 @@
 
 class UUserWidget;
 class UCMainMenuWidget;
+class FOnlineSessionSearch;
 
 UCLASS()
 class OSS_API UCGameInstance : public UGameInstance, public ICMenuInterface
@@ -22,10 +23,14 @@ public:
 	UFUNCTION(Exec)
 	virtual void Host() override;
 
+	void CreateSession_Internal();
+
 	UFUNCTION(Exec)
 	virtual void Join(const FString& InAddress) override;
 	
 	virtual void OpenMainMenuLevel() override;
+
+	virtual void StartFindSession() override;
 
 public:
 	UFUNCTION(BlueprintCallable, Exec)
@@ -36,7 +41,8 @@ public:
 
 private:
 	void OnCreateSessionCompleted(FName InSessionName, bool bWasSuccessful);
-
+	void OnDestroySessionCompleted(FName InSessionName, bool bWasSuccessful);
+	void OnFindSessionCompleted(bool bWasSuccessful);
 
 private:
 	TSubclassOf<UUserWidget> MainMenuWidgetClass;
@@ -45,4 +51,5 @@ private:
 	TSubclassOf<UUserWidget> InGameMenuWidgetClass;
 
 	IOnlineSessionPtr SessionInterface;
+	TSharedPtr<FOnlineSessionSearch> SessionSearch;
 };
