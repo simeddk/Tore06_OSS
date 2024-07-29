@@ -8,6 +8,18 @@ class UButton;
 class UWidgetSwitcher;
 class UPanelWidget;
 
+USTRUCT()
+struct FSessionData
+{
+	GENERATED_BODY()
+
+public:
+	FString Name;
+	uint16 CurrentPlayers;
+	uint16 MaxPlayers;
+	FString HostUserName;
+};
+
 UCLASS()
 class OSS_API UCMainMenuWidget : public UCMenuWidgetBase
 {
@@ -36,7 +48,7 @@ private:
 	void QuitPressed();
 
 public:
-	void SetSessionList(TArray<FString> InSessionNames);
+	void SetSessionList(TArray<FSessionData> InSessionDatas);
 	void SetSelectedIndex(uint32 InIndex);
 	
 protected:

@@ -4,6 +4,7 @@
 #include "Engine/GameInstance.h"
 #include "CMenuInterface.h"
 #include "OnlineSubsystem.h"
+#include "Interfaces/OnlineSessionInterface.h"
 #include "CGameInstance.generated.h"
 
 class UUserWidget;
@@ -26,7 +27,7 @@ public:
 	void CreateSession_Internal();
 
 	UFUNCTION(Exec)
-	virtual void Join(const FString& InAddress) override;
+	virtual void Join(uint32 InIndex) override;
 	
 	virtual void OpenMainMenuLevel() override;
 
@@ -43,6 +44,7 @@ private:
 	void OnCreateSessionCompleted(FName InSessionName, bool bWasSuccessful);
 	void OnDestroySessionCompleted(FName InSessionName, bool bWasSuccessful);
 	void OnFindSessionCompleted(bool bWasSuccessful);
+	void OnJoinSessionCompleted(FName InSessionName, EOnJoinSessionCompleteResult::Type InResult);
 
 private:
 	TSubclassOf<UUserWidget> MainMenuWidgetClass;

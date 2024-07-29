@@ -24,6 +24,10 @@ private:
 	UFUNCTION()
 	void OnClicked();
 
+public:
+	UPROPERTY(BlueprintReadOnly)
+	bool bEverClicked;
+
 private:
 	UPROPERTY(meta = (BindWidget))
 	UButton* RowButton;
