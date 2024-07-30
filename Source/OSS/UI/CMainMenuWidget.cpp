@@ -3,6 +3,7 @@
 #include "Components/WidgetSwitcher.h"
 #include "Components/PanelWidget.h"
 #include "Components/TextBlock.h"
+#include "Components/EditableTextBox.h"
 #include "CSessionRowWidget.h"
 
 UCMainMenuWidget::UCMainMenuWidget()
@@ -25,7 +26,17 @@ bool UCMainMenuWidget::Initialize()
 
 	if (HostButton)
 	{
-		HostButton->OnClicked.AddDynamic(this, &UCMainMenuWidget::HostServer);
+		HostButton->OnClicked.AddDynamic(this, &UCMainMenuWidget::SwitchHostMenu);
+	}
+
+	if (CancelHostMenuButton)
+	{
+		CancelHostMenuButton->OnClicked.AddDynamic(this, &UCMainMenuWidget::SwitchMainMenu);
+	}
+
+	if (HostServerButton)
+	{
+		HostServerButton->OnClicked.AddDynamic(this, &UCMainMenuWidget::HostServer);
 	}
 
 	if (JoinButton)
@@ -55,7 +66,7 @@ void UCMainMenuWidget::HostServer()
 {
 	ensure(OwningInstance);
 
-	OwningInstance->Host();
+	OwningInstance->Host(DesiredSessionName->GetText().ToString());
 }
 
 void UCMainMenuWidget::JoinServer()
@@ -91,6 +102,14 @@ void UCMainMenuWidget::SwitchMainMenu()
 	MenuSwitcher->SetActiveWidget(MainMenu);
 }
 
+void UCMainMenuWidget::SwitchHostMenu()
+{
+	ensure(MenuSwitcher);
+	ensure(HostMenu);
+
+	MenuSwitcher->SetActiveWidget(HostMenu);
+}
+
 void UCMainMenuWidget::QuitPressed()
 {
 	UWorld* World = GetWorld();
@@ -118,6 +137,11 @@ void UCMainMenuWidget::SetSessionList(TArray<FSessionData> InSessionDatas)
 		if (SessionRow)
 		{
 			SessionRow->SessionName->SetText(FText::FromString(SessionData.Name));
+			SessionRow->HostUser->SetText(FText::FromString(SessionData.HostUserName));
+			
+			FString FractionStr = FString::Printf(TEXT("%d/%d"), SessionData.CurrentPlayers, SessionData.MaxPlayers);
+			SessionRow->ConnectionFraction->SetText(FText::FromString(FractionStr));
+
 			SessionRow->Setup(this, i++);
 			SessionList->AddChild(SessionRow);
 		}

@@ -22,7 +22,7 @@ public:
 
 public:
 	UFUNCTION(Exec)
-	virtual void Host() override;
+	virtual void Host(FString InDesiredSessionName) override;
 
 	void CreateSession_Internal();
 
@@ -54,4 +54,6 @@ private:
 
 	IOnlineSessionPtr SessionInterface;
 	TSharedPtr<FOnlineSessionSearch> SessionSearch;
+
+	FString DesiredSessionName;
 };

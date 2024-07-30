@@ -5,6 +5,7 @@
 #include "../UI/CMainMenuWidget.h"
 
 const static FName SESSION_NAME = TEXT("GameSession");
+const static FName SESSION_SETTINGS_KEY = TEXT("ToreKey");
 
 UCGameInstance::UCGameInstance()
 {
@@ -47,8 +48,10 @@ void UCGameInstance::Init()
 	}
 }
 
-void UCGameInstance::Host()
+void UCGameInstance::Host(FString InDesiredSessionName)
 {
+	DesiredSessionName = InDesiredSessionName;
+
 	if (SessionInterface.IsValid())
 	{
 		auto ExsistingSession = SessionInterface->GetNamedSession(SESSION_NAME);
@@ -79,9 +82,10 @@ void UCGameInstance::CreateSession_Internal()
 			SessionSettings.bIsLANMatch = false;
 		}
 
-		SessionSettings.NumPublicConnections = 2;
+		SessionSettings.NumPublicConnections = 5;
 		SessionSettings.bShouldAdvertise = true;
 		SessionSettings.bUsesPresence = true;
+		SessionSettings.Set(SESSION_SETTINGS_KEY, DesiredSessionName, EOnlineDataAdvertisementType::ViaOnlineServiceAndPing);
 
 		SessionInterface->CreateSession(0, SESSION_NAME, SessionSettings);
 	}
@@ -176,7 +180,7 @@ void UCGameInstance::OnCreateSessionCompleted(FName InSessionName, bool bWasSucc
 	{
 		return;
 	}
-	World->ServerTravel("/Game/Maps/Coop?listen");
+	World->ServerTravel("/Game/Maps/Lobby?listen");
 }
 
 void UCGameInstance::OnDestroySessionCompleted(FName InSessionName, bool bWasSuccessful)
@@ -203,10 +207,19 @@ void UCGameInstance::OnFindSessionCompleted(bool bWasSuccessful)
 			UE_LOG(LogTemp, Error, TEXT("Ping(ms) : %d"), SearchResult.PingInMs);
 
 			FSessionData Data;
-			Data.Name = SearchResult.GetSessionIdStr();
 			Data.MaxPlayers = SearchResult.Session.SessionSettings.NumPublicConnections;
 			Data.CurrentPlayers = Data.MaxPlayers - SearchResult.Session.NumOpenPublicConnections;
 			Data.HostUserName = SearchResult.Session.OwningUserName;
+
+			FString SessionName;
+			if (SearchResult.Session.SessionSettings.Get(SESSION_SETTINGS_KEY, SessionName))
+			{
+				Data.Name = SessionName;
+			}
+			else
+			{
+				UE_LOG(LogTemp, Error, TEXT("SessionSettings Key is not valid"));
+			}
 
 			SessionList.Add(Data);
 		}

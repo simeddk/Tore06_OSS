@@ -7,6 +7,7 @@
 class UButton;
 class UWidgetSwitcher;
 class UPanelWidget;
+class UEditableTextBox;
 
 USTRUCT()
 struct FSessionData
@@ -45,6 +46,9 @@ private:
 	void SwitchMainMenu();
 
 	UFUNCTION()
+	void SwitchHostMenu();
+
+	UFUNCTION()
 	void QuitPressed();
 
 public:
@@ -66,6 +70,12 @@ protected:
 	UButton* JoinServerButton;
 
 	UPROPERTY(meta = (BindWidget))
+	UButton* CancelHostMenuButton;
+
+	UPROPERTY(meta = (BindWidget))
+	UButton* HostServerButton;
+
+	UPROPERTY(meta = (BindWidget))
 	UButton* QuitButton;
 
 	//Widgets
@@ -79,7 +89,13 @@ protected:
 	UWidget* JoinMenu;
 
 	UPROPERTY(meta = (BindWidget))
+	UWidget* HostMenu;
+
+	UPROPERTY(meta = (BindWidget))
 	UPanelWidget* SessionList;
+
+	UPROPERTY(meta = (BindWidget))
+	UEditableTextBox* DesiredSessionName;
 
 private:
 	TSubclassOf<UUserWidget> SessionRowClass;

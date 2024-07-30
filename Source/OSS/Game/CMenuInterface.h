@@ -15,7 +15,7 @@ class OSS_API ICMenuInterface
 	GENERATED_BODY()
 
 public:
-	virtual void Host() = 0;
+	virtual void Host(FString InDesiredSessionName) = 0;
 	virtual void Join(uint32 InIndex) = 0;
 	virtual void OpenMainMenuLevel() = 0;
 	virtual void StartFindSession() = 0;

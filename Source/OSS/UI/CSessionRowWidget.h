@@ -20,6 +20,12 @@ public:
 	UPROPERTY(meta = (BindWidget))
 	UTextBlock* SessionName;
 
+	UPROPERTY(meta = (BindWidget))
+	UTextBlock* HostUser;
+
+	UPROPERTY(meta = (BindWidget))
+	UTextBlock* ConnectionFraction;
+
 private:
 	UFUNCTION()
 	void OnClicked();
@@ -31,6 +37,8 @@ public:
 private:
 	UPROPERTY(meta = (BindWidget))
 	UButton* RowButton;
+
+	
 
 private:
 	UCMainMenuWidget* ParentWidget;
