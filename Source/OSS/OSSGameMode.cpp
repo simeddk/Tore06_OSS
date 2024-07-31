@@ -1,7 +1,7 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
 #include "OSSGameMode.h"
-#include "OSSCharacter.h"
+#include "Characters/OSSCharacter.h"
 #include "UObject/ConstructorHelpers.h"
 
 AOSSGameMode::AOSSGameMode()
