@@ -68,5 +68,12 @@ protected:
 	FHitResult WeaponTrace(const FVector& StartTrace, const FVector& EndTrace) const;
 
 	virtual void SetupPlayerInputComponent(class UInputComponent* InputComponent) override;
+
+private:
+	UFUNCTION(Server, Unreliable)
+	void ServerFire();
+
+	UFUNCTION(NetMulticast, Unreliable)
+	void NetMulticastFire();
 };
 

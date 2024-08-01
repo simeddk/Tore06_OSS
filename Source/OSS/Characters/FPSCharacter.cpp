@@ -123,11 +123,6 @@ void AFPSCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerInput
 
 void AFPSCharacter::OnFire()
 {
-	if (FireSound != NULL)
-	{
-		UGameplayStatics::PlaySoundAtLocation(this, FireSound, GetActorLocation());
-	}
-
 	if (FP_FireAnimation != NULL)
 	{
 		UAnimInstance* AnimInstance = FP_Mesh->GetAnimInstance();
@@ -159,6 +154,43 @@ void AFPSCharacter::OnFire()
 	if ((DamagedActor != NULL) && (DamagedActor != this) && (DamagedComponent != NULL) && DamagedComponent->IsSimulatingPhysics())
 	{
 		DamagedComponent->AddImpulseAtLocation(ShootDir * WeaponDamage, Impact.Location);
+	}
+
+	if (FP_GunshotParticle)
+	{
+		FP_GunshotParticle->ResetParticles();
+		FP_GunshotParticle->SetActive(true);
+	}
+
+	ServerFire();
+	
+}
+
+void AFPSCharacter::ServerFire_Implementation()
+{
+	NetMulticastFire();
+}
+
+void AFPSCharacter::NetMulticastFire_Implementation()
+{
+	if (FireSound != NULL)
+	{
+		UGameplayStatics::PlaySoundAtLocation(this, FireSound, GetActorLocation());
+	}
+
+	if (TP_GunshotParticle)
+	{
+		TP_GunshotParticle->ResetParticles();
+		TP_GunshotParticle->SetActive(true);
+	}
+
+	if (TP_FireAnimation)
+	{
+		UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+		if (AnimInstance)
+		{
+			AnimInstance->Montage_Play(TP_FireAnimation);
+		}
 	}
 }
 
