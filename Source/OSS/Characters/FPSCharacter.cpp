@@ -5,12 +5,15 @@
 #include "Camera/CameraComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "GameFramework/PlayerController.h"
+#include "Particles/ParticleSystemComponent.h"
 
 #define COLLISION_WEAPON		ECC_GameTraceChannel1
 
 AFPSCharacter::AFPSCharacter()
 {
+	//-------------------------------------------------------------------------
 	//Properties
+	//-------------------------------------------------------------------------
 	GetCapsuleComponent()->InitCapsuleSize(44.f, 88.f);
 
 	BaseTurnRate = 45.f;
@@ -19,20 +22,25 @@ AFPSCharacter::AFPSCharacter()
 	WeaponRange = 5000.0f;
 	WeaponDamage = 20.0f;
 
-	GunOffset = FVector(100.0f, 30.0f, 10.0f);
-
+	//-------------------------------------------------------------------------
 	//CameraComp
+	//-------------------------------------------------------------------------
 	CameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("CameraComponent"));
 	CameraComponent->SetupAttachment(GetCapsuleComponent());
 	CameraComponent->SetRelativeLocation(FVector(0, 0, 64.f));
 	CameraComponent->bUsePawnControlRotation = true;
 	
-	//FirstPerson(Only Owner See)
+	//-------------------------------------------------------------------------
+	//FirstPerson `Arm` Mesh(Only Owner See)
+	// @ Self See
+	//-------------------------------------------------------------------------
 	FP_Mesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("FP_Mesh"));
 	FP_Mesh->SetOnlyOwnerSee(true);
 	FP_Mesh->SetupAttachment(CameraComponent);
 	FP_Mesh->bCastDynamicShadow = false;
 	FP_Mesh->CastShadow = false;
+	FP_Mesh->SetRelativeLocation(FVector(-0.5f, -4.4f, -155.7f));
+	FP_Mesh->SetRelativeRotation(FRotator(1.9f, -19.2f, 5.2f));
 	
 	ConstructorHelpers::FObjectFinder<USkeletalMesh> ArmMeshAsset(TEXT("/Game/FirstPerson/Character/Mesh/SK_Mannequin_Arms"));
 	if (ArmMeshAsset.Succeeded())
@@ -52,7 +60,12 @@ AFPSCharacter::AFPSCharacter()
 	FP_Gun->CastShadow = false;	
 	FP_Gun->SetupAttachment(FP_Mesh, TEXT("GripPoint"));
 
-	//ThirdPerson(Owner No See)
+	//-------------------------------------------------------------------------
+	//ThirdPerson `Mannequin` Mesh(Owner No See)
+	// @ Other See
+	//-------------------------------------------------------------------------
+	GetMesh()->SetRelativeLocation(FVector(0, 0, -88));
+	GetMesh()->SetRelativeRotation(FRotator(0, -0, 0));
 	GetMesh()->SetOwnerNoSee(true);
 	TP_Gun = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("TP_Gun"));
 	TP_Gun->SetOwnerNoSee(true);
@@ -69,6 +82,26 @@ AFPSCharacter::AFPSCharacter()
 	{
 		GetMesh()->SetAnimClass(TPAnimClass.Class);
 	}
+
+	//-------------------------------------------------------------------------
+	//Gun Asset
+	//-------------------------------------------------------------------------
+	ConstructorHelpers::FObjectFinder<USkeletalMesh> GunAsset(TEXT("/Game/FirstPerson/FPWeapon/Mesh/SK_FPGun"));
+	if (GunAsset.Succeeded())
+	{
+		TP_Gun->SetSkeletalMesh(GunAsset.Object);
+		FP_Gun->SetSkeletalMesh(GunAsset.Object);
+	}
+
+	FP_GunshotParticle = CreateDefaultSubobject<UParticleSystemComponent>(TEXT("FP_GunshotParticle"));
+	FP_GunshotParticle->bAutoActivate = false;
+	FP_GunshotParticle->SetupAttachment(FP_Gun, "Muzzle");
+	FP_GunshotParticle->SetOnlyOwnerSee(true);
+
+	TP_GunshotParticle = CreateDefaultSubobject<UParticleSystemComponent>(TEXT("TP_GunshotParticle"));
+	TP_GunshotParticle->bAutoActivate = false;
+	TP_GunshotParticle->SetupAttachment(TP_Gun, "Muzzle");
+	TP_GunshotParticle->SetOwnerNoSee(true);
 }
 
 void AFPSCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent)
@@ -95,12 +128,12 @@ void AFPSCharacter::OnFire()
 		UGameplayStatics::PlaySoundAtLocation(this, FireSound, GetActorLocation());
 	}
 
-	if (FireAnimation != NULL)
+	if (FP_FireAnimation != NULL)
 	{
 		UAnimInstance* AnimInstance = FP_Mesh->GetAnimInstance();
 		if (AnimInstance != NULL)
 		{
-			AnimInstance->Montage_Play(FireAnimation, 1.f);
+			AnimInstance->Montage_Play(FP_FireAnimation, 1.f);
 		}
 	}
 
@@ -165,4 +198,3 @@ FHitResult AFPSCharacter::WeaponTrace(const FVector& StartTrace, const FVector& 
 
 	return Hit;
 }
-//Todo. Build

@@ -9,6 +9,7 @@ class UCameraComponent;
 class USkeletalMeshComponent;
 class USoundBase;
 class UAnimMontage;
+class UParticleSystemComponent;
 
 UCLASS(config=Game)
 class AFPSCharacter : public ACharacter
@@ -24,8 +25,11 @@ class AFPSCharacter : public ACharacter
 	UPROPERTY(VisibleDefaultsOnly, Category = Mesh)
 	USkeletalMeshComponent* TP_Gun;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
-	UAnimMontage* TP_FireAnimation;
+	UPROPERTY(VisibleDefaultsOnly, Category = Muzzle)
+	UParticleSystemComponent* FP_GunshotParticle;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Muzzle)
+	UParticleSystemComponent* TP_GunshotParticle;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 	UCameraComponent* CameraComponent;
@@ -40,13 +44,13 @@ public:
 	float BaseLookUpRate;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category=Gameplay)
-	FVector GunOffset;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category=Gameplay)
 	USoundBase* FireSound;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
-	UAnimMontage* FireAnimation;
+	UAnimMontage* FP_FireAnimation;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
+	UAnimMontage* TP_FireAnimation;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
 	float WeaponRange;

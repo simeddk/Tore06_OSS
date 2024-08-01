@@ -173,7 +173,7 @@ void UCGameInstance::LoadInGameMenu()
 
 void UCGameInstance::OnCreateSessionCompleted(FName InSessionName, bool bWasSuccessful)
 {
-	UE_LOG(LogTemp, Error, TEXT("Created Session")); //Hack
+	UE_LOG(LogTemp, Error, TEXT("Created Session"));
 
 	if (!bWasSuccessful)
 	{
@@ -198,7 +198,7 @@ void UCGameInstance::OnCreateSessionCompleted(FName InSessionName, bool bWasSucc
 
 void UCGameInstance::OnDestroySessionCompleted(FName InSessionName, bool bWasSuccessful)
 {
-	UE_LOG(LogTemp, Error, TEXT("Destroied Session")); //Hack
+	UE_LOG(LogTemp, Error, TEXT("Destroied Session"));
 
 	if (bWasSuccessful)
 	{
