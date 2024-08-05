@@ -11,6 +11,13 @@ class AFPSGameMode : public AGameModeBase
 
 public:
 	AFPSGameMode();
+
+public:
+	void OnActorKilled(AActor* VictimActor);
+
+private:
+	UFUNCTION()
+	void RespawnPlayerElpased(APlayerController* Controller);
 };
 
 

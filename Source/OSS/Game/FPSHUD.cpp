@@ -6,12 +6,31 @@
 #include "CanvasItem.h"
 #include "UObject/ConstructorHelpers.h"
 #include "Engine/Texture2D.h"
+#include "../UI/CPlayerStatusWidget.h"
 
 AFPSHUD::AFPSHUD()
 {
 	// Set the crosshair texture
 	static ConstructorHelpers::FObjectFinder<UTexture2D> CrosshairTexObj(TEXT("/Game/FirstPerson/Textures/FirstPersonCrosshair"));
 	CrosshairTex = CrosshairTexObj.Object;
+
+	static ConstructorHelpers::FClassFinder<UCPlayerStatusWidget> WidgetClass(TEXT("/Game/UI/WB_PlayerStatus"));
+	if (WidgetClass.Succeeded())
+	{
+		PlayerStatusWidgetClass = WidgetClass.Class;
+	}
+}
+
+
+void AFPSHUD::BeginPlay()
+{
+	Super::BeginPlay();
+
+	if (ensure(PlayerStatusWidgetClass))
+	{
+		PlayerStatusWidget = CreateWidget<UCPlayerStatusWidget>(GetWorld(), PlayerStatusWidgetClass);
+		PlayerStatusWidget->AddToViewport();
+	}
 }
 
 /** This method draws a very simple crosshair */
@@ -31,3 +50,4 @@ void AFPSHUD::DrawHUD()
 	TileItem.BlendMode = SE_BLEND_Translucent;
 	Canvas->DrawItem( TileItem );
 }
+
