@@ -5,7 +5,10 @@
 #include "Camera/CameraComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "GameFramework/PlayerController.h"
+#include "GameFramework/CharacterMovementComponent.h"
 #include "Particles/ParticleSystemComponent.h"
+#include "Net/UnrealNetwork.h"
+#include "../Actors/CBullet.h"
 
 #define COLLISION_WEAPON		ECC_GameTraceChannel1
 
@@ -111,6 +114,7 @@ void AFPSCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerInput
 	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ACharacter::Jump);
 	PlayerInputComponent->BindAction("Jump", IE_Released, this, &ACharacter::StopJumping);
 	PlayerInputComponent->BindAction("Fire", IE_Pressed, this, &AFPSCharacter::OnFire);
+	PlayerInputComponent->BindAction("Crouch", IE_Pressed, this, &AFPSCharacter::ToggleCrouch);
 
 	PlayerInputComponent->BindAxis("MoveForward", this, &AFPSCharacter::MoveForward);
 	PlayerInputComponent->BindAxis("MoveRight", this, &AFPSCharacter::MoveRight);
@@ -163,12 +167,52 @@ void AFPSCharacter::OnFire()
 	}
 
 	ServerFire();
-	
+}
+
+void AFPSCharacter::ToggleCrouch()
+{
+	ServerToggleCrouch();
+}
+
+void AFPSCharacter::ServerToggleCrouch_Implementation()
+{
+	bCrouch = !bCrouch;
+
+	CrouchMovement();
+}
+
+
+void AFPSCharacter::OpRep_bCrouch()
+{
+	CrouchMovement();
+}
+
+void AFPSCharacter::CrouchMovement()
+{
+	if (bCrouch)
+	{
+		CameraComponent->SetRelativeLocation(FVector::ZeroVector);
+		GetCharacterMovement()->MaxWalkSpeed = 270.f;
+	}
+	else
+	{
+		CameraComponent->SetRelativeLocation(FVector(0, 0, 64));
+		GetCharacterMovement()->MaxWalkSpeed = 600.f;
+	}
 }
 
 void AFPSCharacter::ServerFire_Implementation()
 {
 	NetMulticastFire();
+
+	if (ensure(BulletClass))
+	{
+		FActorSpawnParameters SpawnParam;
+		SpawnParam.Instigator = this;
+		SpawnParam.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
+
+		GetWorld()->SpawnActor<AActor>(BulletClass, FP_Gun->GetSocketLocation("Muzzle"), GetControlRotation(), SpawnParam);
+	}
 }
 
 void AFPSCharacter::NetMulticastFire_Implementation()
@@ -229,4 +273,11 @@ FHitResult AFPSCharacter::WeaponTrace(const FVector& StartTrace, const FVector& 
 	GetWorld()->LineTraceSingleByChannel(Hit, StartTrace, EndTrace, COLLISION_WEAPON, TraceParams);
 
 	return Hit;
+}
+
+void AFPSCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps)const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(AFPSCharacter, bCrouch);
 }
