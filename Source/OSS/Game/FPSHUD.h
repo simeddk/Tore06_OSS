@@ -31,5 +31,8 @@ private:
 	TSubclassOf<UCPlayerStatusWidget> PlayerStatusWidgetClass;
 
 	UCPlayerStatusWidget* PlayerStatusWidget;
+
+public:
+	void OnPlayerDead();
 };
 
