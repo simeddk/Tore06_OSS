@@ -12,10 +12,10 @@ void ACLobbyGameMode::PostLogin(APlayerController* NewPlayer)
 	LogOnScreen(this, "Current Players : " + FString::FromInt(NumberOfPlayers));
 	UE_LOG(LogTemp, Warning, TEXT("PostLogin : Current Players : %s"), *FString::FromInt(NumberOfPlayers));
 
-	if (NumberOfPlayers >= 3)
+	if (NumberOfPlayers >= 2)
 	{
-		LogOnScreen(this, "Reached 3 Players");
-		UE_LOG(LogTemp, Error, TEXT("Reached 3 Players"));
+		LogOnScreen(this, "Reached Max Players");
+		UE_LOG(LogTemp, Error, TEXT("Reached Max Players"));
 
 		GetWorldTimerManager().SetTimer(GamerStartTimer, this, &ACLobbyGameMode::StartGame, 5.f);
 	}
@@ -41,7 +41,7 @@ void ACLobbyGameMode::StartGame()
 	UWorld* World = GetWorld();
 	if (World)
 	{
-		bUseSeamlessTravel = true;
+		//bUseSeamlessTravel = true;
 		World->ServerTravel("/Game/Maps/FPS?listen");
 	}
 }

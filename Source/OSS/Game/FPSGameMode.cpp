@@ -1,10 +1,11 @@
 #include "FPSGameMode.h"
 #include "FPSHUD.h"
-#include "../Characters/FPSCharacter.h"
 #include "UObject/ConstructorHelpers.h"
-#include "GameFramework/PlayerStart.h"
 #include "EngineUtils.h"
-#include "CPlayerState.h"
+#include "GameFramework/PlayerStart.h"
+#include "Kismet/KismetMathLibrary.h"
+#include "../Characters/FPSCharacter.h"
+#include "../OSS.h"
 
 AFPSGameMode::AFPSGameMode()
 {
@@ -23,21 +24,26 @@ void AFPSGameMode::StartPlay()
 	{
 		if (It->PlayerStartTag == "Red")
 		{
-			RedTeamPlayerStarts.Add(*It);
+			if (RedTeamPlayerStarts.Find(*It) < 0)
+			{
+				RedTeamPlayerStarts.Add(*It);
+			}
 		}
 		else
 		{
-			BlueTeamPlayerStarts.Add(*It);
+			if (BlueTeamPlayerStarts.Find(*It) < 0)
+			{
+				BlueTeamPlayerStarts.Add(*It);
+			}
 		}
 	}
 
-	UE_LOG(LogTemp, Error, TEXT("RedTeam : %d"), RedTeamPlayerStarts.Num());
-	UE_LOG(LogTemp, Error, TEXT("BlueTeam : %d"), BlueTeamPlayerStarts.Num());
+	LogOnScreen(this, "RedTeam : " + FString::FromInt(RedTeamPlayerStarts.Num()), FColor::Red);
+	LogOnScreen(this, "BlueTeam : " + FString::FromInt(BlueTeamPlayerStarts.Num()), FColor::Blue);
 }
 
 void AFPSGameMode::PostLogin(APlayerController* NewPlayer)
 {
-	//Todo. LaunchGame -> Do not work
 	Super::PostLogin(NewPlayer);
 
 	AFPSCharacter* PlayerCharacter = NewPlayer->GetPawn<AFPSCharacter>();
@@ -57,6 +63,45 @@ void AFPSGameMode::PostLogin(APlayerController* NewPlayer)
 	}
 
 	PlayerCharacter->SetTeamColor(PS->Team);
+	MoveToPlayerStart(PlayerCharacter, PS->Team);
+}
+
+void AFPSGameMode::MoveToPlayerStart(APawn* Pawn, ETeamType Team)
+{
+	if (RedTeamPlayerStarts.Num() < 1 || BlueTeamPlayerStarts.Num() < 1)
+	{
+		StartPlay();
+	}
+
+	int32 Random = 0;
+	FVector Location = FVector::ZeroVector;
+	FRotator Rotation = FRotator::ZeroRotator;
+
+	switch (Team)
+	{
+		case ETeamType::Red:
+		{
+			Random = UKismetMathLibrary::RandomInteger(RedTeamPlayerStarts.Num() - 1);
+			Location = RedTeamPlayerStarts[Random]->GetActorLocation();
+			Rotation = RedTeamPlayerStarts[Random]->GetActorRotation();
+		}
+		break;
+
+		case ETeamType::Blue:
+		{
+			Random = UKismetMathLibrary::RandomInteger(BlueTeamPlayerStarts.Num() - 1);
+			Location = BlueTeamPlayerStarts[Random]->GetActorLocation();
+			Rotation = BlueTeamPlayerStarts[Random]->GetActorRotation();
+		}
+		break;
+	}
+
+	Pawn->SetActorLocation(Location);
+	
+	if (Pawn->GetController())
+	{
+		Pawn->GetController()->ClientSetRotation(Rotation, true);
+	}
 }
 
 void AFPSGameMode::OnActorKilled(AActor* VictimActor)
@@ -86,6 +131,7 @@ void AFPSGameMode::RespawnPlayerElpased(APlayerController* Controller)
 		if (PS)
 		{
 			NewPlayerCharacter->SetTeamColor(PS->Team);
+			MoveToPlayerStart(NewPlayerCharacter, PS->Team);
 		}
 	}
 }

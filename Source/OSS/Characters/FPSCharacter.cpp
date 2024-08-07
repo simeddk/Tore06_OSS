@@ -310,12 +310,16 @@ void AFPSCharacter::ClientRagdoll_Implementation(FVector ImpactDirection)
 	APlayerController* PC = GetController<APlayerController>();
 	if (PC)
 	{
+		DisableInput(PC);
+
 		AFPSHUD* HUD = PC->GetHUD<AFPSHUD>();
 		if (HUD)
 		{
 			HUD->OnPlayerDead();
 		}
 	}
+
+	
 }
 
 void AFPSCharacter::MoveForward(float Value)
